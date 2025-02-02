@@ -1,0 +1,36 @@
+serviceMonitor:
+  enabled: false
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: '{{ .Values.role_arn }}'
+replicas: 2
+revisionHistoryLimit: 10
+hostNetwork: true
+# nodeSelector:
+#   CriticalAddonsOnly: true
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: karpenter.sh/nodepool
+              operator: DoesNotExist
+            - key: eks.amazonaws.com/nodegroup
+              operator: In
+              values:
+                - CriticalAddonsOnly
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: kubernetes.io/hostname
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+logLevel: debug
+settings:
+  clusterName: '{{ .Values.cluster_name }}'
+  # interruptionQueue: '{{ .Values.cluster_name }}'
