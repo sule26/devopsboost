@@ -1,25 +1,25 @@
 # VPC
-variable "project_name" {
-  description = "Project name"
-  type        = string
-}
-
 variable "vpc_name" {
   description = "Name of the VPC"
   type        = string
 }
 
-variable "vpc_cidr" {
+variable "cidr" {
   description = "Cidr of the VPC"
   type        = string
 }
 
-variable "private_subnets_cidr" {
+variable "azs" {
+  description = "List of subnets"
+  type        = list(string)
+}
+
+variable "private_subnets" {
   description = "Cidr for private subnets"
   type        = list(string)
 }
 
-variable "public_subnets_cidr" {
+variable "public_subnets" {
   description = "Cidr for public subnets"
   type        = list(string)
 }
@@ -61,7 +61,6 @@ variable "stored_version" {
   type        = number
   default     = 5
 }
-
 
 # EKS
 variable "cluster_version" {

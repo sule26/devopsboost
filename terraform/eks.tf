@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "eks" {
-  name     = var.cluster_name
-  version  = var.cluster_version
-  role_arn = aws_iam_role.cluster_role.arn
+  name       = var.cluster_name
+  version    = var.cluster_version
+  role_arn   = aws_iam_role.cluster_role.arn
   access_config {
     authentication_mode                         = "CONFIG_MAP"
     bootstrap_cluster_creator_admin_permissions = "true"
@@ -9,9 +9,6 @@ resource "aws_eks_cluster" "eks" {
   kubernetes_network_config {
     ip_family         = "ipv4"
     service_ipv4_cidr = var.service_ipv4_cidr
-  }
-  upgrade_policy {
-    support_type = "EXTENDED"
   }
   vpc_config {
     endpoint_private_access = "false"
