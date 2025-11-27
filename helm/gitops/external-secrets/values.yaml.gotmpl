@@ -1,0 +1,76 @@
+replicaCount: 1
+bitwarden-sdk-server:
+  enabled: false
+revisionHistoryLimit: 10
+installCRDs: true
+controllerClass: ''
+log:
+  level: debug
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: '{{ .Values.external_secrets_role_arn }}'
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi
+serviceMonitor:
+  enabled: true
+grafanaDashboard:
+  enabled: true
+  sidecarLabel: 'grafana_dashboard'
+  sidecarLabelValue: '1'
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+webhook:
+  create: true
+  replicaCount: 1
+  log:
+    level: debug
+  serviceAccount:
+    create: true
+  certManager:
+    enabled: false
+    cert:
+      create: true
+      issuerRef:
+        group: cert-manager.io
+        kind: ClusterIssuer
+        name: letsencrypt-prod
+      duration: 8760h
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+certController:
+  create: true
+  replicaCount: 1
+  log:
+    level: debug
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi

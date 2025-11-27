@@ -1,0 +1,24 @@
+_1: &solvers
+  - dns01:
+      route53: {}
+  - http01:
+      ingress:
+        ingressClassName: nginx
+  - http01:
+      ingress:
+        ingressClassName: nginx
+clusterIssuers:
+  - name: letsencrypt-prod
+    spec:
+      acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+          name: letsencrypt-prod
+        solvers: *solvers
+  - name: letsencrypt-staging
+    spec:
+      acme:
+        server: https://acme-staging-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+          name: letsencrypt-staging
+        solvers: *solvers

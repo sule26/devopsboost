@@ -1,0 +1,196 @@
+global:
+  domain: &fqdn '{{ .Values.argo_cd_host }}'
+  logging:
+    format: json
+    level: info
+controller:
+  replicas: 1
+  pdb:
+    enabled: false
+    # minAvailable: 1
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+dex:
+  enabled: false
+redisSecretInit:
+  enabled: true
+redis:
+  enabled: true
+  metrics:
+    enabled: true
+  serviceMonitor:
+    enabled: true
+  podMonitor:
+    enabled: true
+  prometheusRule: true
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 32Mi
+crds:
+  install: true
+  keep: true
+configs:
+  repositories:
+    # prettier-ignore
+    # {{ readFile "./repositories.yaml" | fromYaml | toYaml | nindent 6 }}
+  cm:
+    server.rbac.log.enforce.enable: 'true'
+    admin.enabled: true
+    timeout.reconciliation: 30s
+    resource.exclusions: |
+      - apiGroups:
+          - "*"
+        kinds:
+          - Backup
+        clusters:
+          - "*"
+    params:
+      create: true
+      reposerver.parallelism.limit: '1'
+      controller.kubectl.parallelism.limit: '20'
+      server.webhook.parallelism.limit: '50'
+      controller.status.processors: '20'
+      controller.operation.processors: '10'
+      applicationsetcontroller.webhook.parallelism.limit: '50'
+  cmp:
+    create: true
+    plugins:
+      # https://github.com/travisghansen/argo-cd-helmfile/tree/master
+      helmfile:
+        init:
+          command: ['argo-cd-helmfile.sh']
+          args: ['init']
+        generate:
+          command: ['argo-cd-helmfile.sh']
+          args: ['generate']
+        discover:
+          find:
+            command: [argo-cd-helmfile.sh, discover]
+        parameters:
+          dynamic:
+            command: [argo-cd-helmfile.sh, parameters]
+        preserveFileMode: true
+  params:
+    server.insecure: true
+  certificate:
+    enable: true
+server:
+  replicas: 1
+  pdb:
+    enabled: false
+    # minAvailable: 1
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: *fqdn
+    ingressClassName: nginx
+    tls: true
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+repoServer:
+  initContainers:
+    - name: download-tools
+      image: alpine:3.8
+      command: [sh, -c]
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+      args:
+        - wget -qO /custom-tools/argo-cd-helmfile.sh https://raw.githubusercontent.com/travisghansen/argo-cd-helmfile/master/src/argo-cd-helmfile.sh &&
+          chmod +x /custom-tools/argo-cd-helmfile.sh &&
+          wget -qO /custom-tools/helmfile https://github.com/roboll/helmfile/releases/download/v0.138.7/helmfile_linux_amd64 &&
+          chmod +x /custom-tools/helmfile
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+  volumeMounts:
+    - mountPath: /usr/local/bin/argo-cd-helmfile.sh
+      name: custom-tools
+      subPath: argo-cd-helmfile.sh
+    - mountPath: /usr/local/bin/helmfile
+      name: custom-tools
+      subPath: helmfile
+  extraContainers:
+    - name: helmfile-plugin
+      image: travisghansen/argo-cd-helmfile:v0.3.13
+      command: [/var/run/argocd/argocd-cmp-server]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /tmp
+          name: helmfile-cmp-tmp
+  volumes:
+    - name: helmfile-cmp-tmp
+      emptyDir: {}
+    - name: custom-tools
+      emptyDir: {}
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+applicationSet:
+  enabled: true
+  replicas: 1
+  pdb:
+    enabled: false
+    # minAvailable: 1
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+notifications:
+  enabled: false
+extraObjects:
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: argo-cd-rules
+    spec:
+      # prettier-ignore
+      # {{ exec "yq" (list "." "./prometheus.rules.yaml") | nindent 6 }}

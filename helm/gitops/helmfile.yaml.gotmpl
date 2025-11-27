@@ -1,0 +1,97 @@
+repositories:
+  - name: crossplane-stable
+    url: https://charts.crossplane.io/stable
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
+  - name: vmware-tanzu
+    url: https://vmware-tanzu.github.io/helm-charts
+  - name: external-secrets
+    url: https://charts.external-secrets.io
+environments:
+  default:
+    values:
+      - velero_bucket: uerj-devops-velero
+        loki_bucket: uerj-devops-loki
+        velero_role_arn: arn:aws:iam::154996170705:role/VeleroAccessRole
+        crossplane_role_arn: arn:aws:iam::154996170705:role/CrossplaneAccessRole
+        external_secrets_role_arn: arn:aws:iam::154996170705:role/ExternalSecretAccessRole
+        loki_role_arn: arn:aws:iam::154996170705:role/LokiAccessRole
+        alertmanager_host: alertmanager.sule.live
+        grafana_host: grafana.sule.live
+        loki_host: loki.sule.live
+        prometheus_host: prometheus.sule.live
+        region: us-east-1
+        releases:
+          crossplane:
+            version: 1.19.0
+            namespace: crossplane
+          crossplane-raw:
+            version: ''
+            namespace: crossplane
+          external-secrets:
+            version: 0.17.0
+            namespace: external-secrets
+          external-secrets-raw:
+            version: ''
+            namespace: external-secrets
+          velero:
+            version: 10.1.3
+            namespace: velero
+          kube-prometheus-stack:
+            version: 79.0.0
+            namespace: monitoring
+          loki:
+            version: 6.24.0
+            namespace: monitoring
+          promtail:
+            version: 6.16.6
+            namespace: monitoring
+          monitoring-raw:
+            version: ''
+            namespace: monitoring
+---
+templates:
+  default: &default
+    version: '{{`{{ .Values | get "releases" | get .Release.Name | get "version" }}`}}'
+    namespace: '{{`{{ .Values | get "releases" | get .Release.Name | get "namespace" }}`}}'
+    values:
+      - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+releases:
+  - chart: crossplane-stable/crossplane
+    name: crossplane
+    <<: *default
+  - chart: bedag/raw
+    name: crossplane-raw
+    <<: *default
+    needs:
+      - crossplane
+  - chart: external-secrets/external-secrets
+    name: external-secrets
+    <<: *default
+    wait: true
+  - chart: bedag/raw
+    name: external-secrets-raw
+    <<: *default
+    needs:
+      - external-secrets
+  - chart: vmware-tanzu/velero
+    name: velero
+    <<: *default
+  - chart: prometheus-community/kube-prometheus-stack
+    name: kube-prometheus-stack
+    <<: *default
+    needs:
+      - monitoring-raw
+  - chart: grafana/loki
+    name: loki
+    <<: *default
+    needs:
+      - promtail
+  - chart: grafana/promtail
+    name: promtail
+    <<: *default
+    needs:
+      - kube-prometheus-stack
+  - chart: bedag/raw
+    name: monitoring-raw
+    <<: *default

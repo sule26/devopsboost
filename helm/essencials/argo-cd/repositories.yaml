@@ -1,0 +1,3 @@
+k8s-setup:
+  url: https://github.com/sule26/devopsboost.git
+  name: devopsboost

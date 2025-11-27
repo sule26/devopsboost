@@ -1,0 +1,60 @@
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: external-dns
+    url: https://kubernetes-sigs.github.io/external-dns
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
+  - name: jetstack
+    url: https://charts.jetstack.io
+  - name: adfinis
+    url: https://charts.adfinis.com
+environments:
+  default:
+    values:
+      - external_dns_role_arn: arn:aws:iam::154996170705:role/ExternalDNSAccessRole
+        cert_manager_role_arn: arn:aws:iam::154996170705:role/CertManagerAccessRole
+        argo_cd_host: argo-cd.sule.live
+        region: us-east-1
+        releases:
+          argo-cd:
+            version: 8.6.0
+            namespace: argo
+          ingress-nginx:
+            version: 4.14.0
+            namespace: nginx
+          external-dns:
+            version: 1.15.0
+            namespace: external-dns
+          cert-manager:
+            version: 1.16.1
+            namespace: cert-manager
+          cert-manager-issuers:
+            version: 0.3.0
+            namespace: cert-manager
+---
+templates:
+  default: &default
+    version: '{{`{{ .Values | get "releases" | get .Release.Name | get "version" }}`}}'
+    namespace: '{{`{{ .Values | get "releases" | get .Release.Name | get "namespace" }}`}}'
+    values:
+      - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+releases:
+  - chart: argo/argo-cd
+    name: argo-cd
+    <<: *default
+    wait: true
+  - chart: external-dns/external-dns
+    name: external-dns
+    <<: *default
+  - chart: ingress-nginx/ingress-nginx
+    name: ingress-nginx
+    <<: *default
+  - chart: jetstack/cert-manager
+    name: cert-manager
+    <<: *default
+  - chart: adfinis/cert-manager-issuers
+    name: cert-manager-issuers
+    <<: *default

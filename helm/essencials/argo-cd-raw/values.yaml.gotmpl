@@ -1,0 +1,49 @@
+resources:
+  - apiVersion: argoproj.io/v1alpha1
+    kind: ApplicationSet
+    metadata:
+      name: dpm-crons
+      # finalizers:
+      #   - resources-finalizer.argocd.argoproj.io
+    spec:
+      goTemplate: true
+      goTemplateOptions: ['missingkey=error']
+      generators:
+        - git:
+            repoURL: https://github.com/sule26/devopsboost.git
+            revision: HEAD
+            directories:
+              - path: '*'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        preserveResourcesOnDeletion: false
+        syncOptions:
+          - CreateNamespace=true
+      template:
+        metadata:
+          name: '{{`{{ .path.basename }}`}}'
+          annotations:
+            argocd.argoproj.io/manifest-generate-paths: '.;..'
+          # finalizers:
+          #   - resources-finalizer.argocd.argoproj.io
+        spec:
+          project: default
+          source:
+            repoURL: https://github.com/sule26/devopsboost.git
+            targetRevision: HEAD
+            path: ./helm/gitops
+            plugin:
+              name: helmfile
+              env:
+                - name: HELMFILE_GLOBAL_OPTIONS
+                  value: --selector name={{`{{ .path.basename }}`}}
+          destination:
+            server: https://kubernetes.default.svc
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true

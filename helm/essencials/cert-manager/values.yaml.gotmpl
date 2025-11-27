@@ -1,0 +1,58 @@
+global:
+  logLevel: 2
+crds:
+  enabled: true
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: '{{ .Values.cert_manager_role_arn }}'
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+enableCertificateOwnerRef: true
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+extraArgs:
+  - --logging-format=json
+  #* https://github.com/cert-manager/cert-manager/issues/5557#issuecomment-1828082848
+  - --issuer-ambient-credentials
+startupapicheck:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+  extraArgs:
+    - -v
+    - --logging-format=json
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+  extraArgs:
+    - --logging-format=json
+cainjector:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+  extraArgs:
+    - --logging-format=json

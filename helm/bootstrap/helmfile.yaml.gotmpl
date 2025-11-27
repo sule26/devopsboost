@@ -1,37 +1,40 @@
 repositories:
+  - name: karpenter
+    url: public.ecr.aws/karpenter
+    oci: true
   - name: bedag
     url: https://bedag.github.io/helm-charts
-templates:
-  default-release: &default-release
-    namespace: kube-system
 environments:
   default:
     values:
-      - kubeContext: arn:aws:eks:us-east-1:154996170705:cluster/main-eks
-        cluster_name: main-eks
-        role_arn: arn:aws:iam::154996170705:role/KarpenterControllerRole-main-eks
+      - cluster_name: uerj-devops
+        karpenter_controller_role_arn: arn:aws:iam::154996170705:role/KarpenterControllerRole-uerj-devops
         releases:
           karpenter:
-            version: 1.1.1
-            <<: *default-release
+            version: 1.5.0
+            namespace: kube-system
           karpenter-raw:
-            version: ""
-            <<: *default-release
+            version: ''
+            namespace: kube-system
+          storage-class:
+            version: ''
+            namespace: default
 ---
 templates:
   default: &default
-    kubeContext: "{{ .Values.kubeContext}}"
     version: '{{`{{ .Values | get "releases" | get .Release.Name | get "version" }}`}}'
     namespace: '{{`{{ .Values | get "releases" | get .Release.Name | get "namespace" }}`}}'
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
 releases:
-  - chart: oci://public.ecr.aws/karpenter/karpenter
+  - chart: karpenter/karpenter
     name: karpenter
     <<: *default
-    wait: true
   - chart: bedag/raw
     name: karpenter-raw
     <<: *default
-    # needs:
-    #   - karpenter
+    needs:
+      - karpenter
+  - chart: bedag/raw
+    name: storage-class
+    <<: *default

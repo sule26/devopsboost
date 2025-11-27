@@ -1,0 +1,31 @@
+daemonset:
+  enabled: true
+config:
+  enabled: true
+  logLevel: info
+  logFormat: json
+  clients:
+    - url: http://loki-gateway.monitoring:80/loki/api/v1/push
+  snippets:
+    pipelineStages:
+      - drop:
+          source: namespace
+          expression: gitlab-runner
+priorityClassName: system-node-critical
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    cpu: 50m
+    memory: 256Mi
+tolerations:
+  - key: purpose
+    operator: Exists
+serviceMonitor:
+  enabled: true
+  prometheusRule:
+    enabled: true
+    rules:
+      # prettier-ignore
+      # {{ exec "yq" (list ".groups[0].rules" "./prometheus.rules.yaml") | nindent 6}}

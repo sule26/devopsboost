@@ -1,0 +1,235 @@
+# _nodepool: &monitoring monitoring
+additionalPrometheusRulesMap:
+  cluster:
+    groups:
+      # prettier-ignore
+      # {{ exec "yq" (list ".groups[0] | [.]" "./prometheus.rules.yaml") | nindent 8 }}
+alertmanager:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: &alertmanager_fqdn '{{ .Values.alertmanager_host }}'
+    hosts:
+      - *alertmanager_fqdn
+    tls:
+      - hosts:
+          - *alertmanager_fqdn
+        secretName: '{{ .Values.alertmanager_host | replace "." "-" }}-tls'
+  alertmanagerSpec:
+    forceEnableClusterMode: true
+    storage:
+      volumeClaimTemplate:
+        metadata:
+          name: alertmanager-data
+        spec:
+          storageClassName: gp3
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+    resources:
+      requests:
+        cpu: 40m
+        memory: 128Mi
+      limits:
+        cpu: 40m
+        memory: 128Mi
+    logLevel: info
+    logFormat: json
+grafana:
+  enabled: true
+  # adminPassword: ref+awssecrets://monitoring?region=us-east-1#/grafana-admin-password
+  env:
+    GF_DIAGNOSTICS_PROFILING_ENABLED: true
+  envRenderSecret:
+    POSTGRES_GRAFANA_PASSWORD: ref+awssecrets://monitoring?region=us-east-1#/eks-postgres-grafana-password
+  envFromSecrets:
+    - name: grafana-database
+  grafana.ini:
+    server:
+      domain: &grafana_fqdn '{{ .Values.grafana_host }}'
+      root_url: 'https://%(domain)s/'
+      serve_from_sub_path: false
+    feature_toggles:
+      enable: externalServiceAccounts
+      accessControlOnCall: false
+    database:
+      type: postgres
+      host: eks-postgres.bdc.internal
+      name: grafana
+      user: grafana
+      database: grafana
+      password: $__env{POSTGRES_GRAFANA_PASSWORD}
+      ssl_mode: require
+    auth:
+      disable_login_form: false
+      oauth_allow_insecure_email_lookup: true
+      managed_service_accounts_enabled: true
+    auth.basic:
+      enabled: true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1024Mi
+    limits:
+      cpu: 250m
+      memory: 1024Mi
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: *grafana_fqdn
+    hosts:
+      - *grafana_fqdn
+    tls:
+      - hosts:
+          - *grafana_fqdn
+        secretName: '{{ .Values.grafana_host | replace "." "-" }}-tls'
+  sidecar:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 128Mi
+      limits:
+        cpu: 20m
+        memory: 128Mi
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: '1'
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      isDefaultDatasource: false
+      label: grafana_datasource
+      labelValue: '1'
+      searchNamespace: ALL
+      alertmanager:
+        enabled: true
+    plugins:
+      enabled: true
+      label: grafana_plugin
+      labelValue: '1'
+      searchNamespace: ALL
+    notifiers:
+      enabled: true
+      label: grafana_notifier
+      labelValue: '1'
+      searchNamespace: ALL
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      uid: loki
+      access: proxy
+      url: http://loki-gateway.monitoring:80
+      jsonData:
+        timeout: 60
+        maxLines: 1000
+      editable: true
+  serviceMonitor:
+    enabled: true
+kubernetesServiceMonitors:
+  enabled: true
+nodeExporter:
+  enabled: true
+prometheus-node-exporter:
+  priorityClassName: system-node-critical
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 25m
+      memory: 64Mi
+kubeStateMetrics:
+  enabled: true
+prometheusOperator:
+  enabled: true
+  kubeletService:
+    enabled: true
+  admissionWebhooks:
+    deployment:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          cpu: 20m
+          memory: 64Mi
+      logformat: json
+      loglevel: info
+    prometheusConfigReloader:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          cpu: 20m
+          memory: 64Mi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 50m
+      memory: 128Mi
+  logLevel: info
+  logFormat: json
+  serviceMonitor:
+    selfMonitor: true
+prometheus:
+  enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: &prometheus_fqdn '{{ .Values.prometheus_host }}'
+    ingressClassName: nginx
+    hosts:
+      - *prometheus_fqdn
+    tls:
+      - hosts:
+          - *prometheus_fqdn
+        secretName: '{{ .Values.prometheus_host | replace "." "-" }}-tls'
+  prometheusSpec:
+    retention: 1d
+    # * Enabling RemoteWrite to Receive K6 metrics
+    enableRemoteWriteReceiver: true
+    # * https://github.com/prometheus-operator/kube-prometheus/issues/1392
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    # * https://github.com/prometheus-operator/prometheus-operator/issues/1547#issuecomment-401092041
+    scrapeConfigSelectorNilUsesHelmValues: true
+    storage:
+      tsdb:
+        out_of_order_time_window: 12h
+    scrapeInterval: 15s
+    evaluation_interval: 15s
+    remoteWriteDashboards: true
+    storageSpec:
+      volumeClaimTemplate:
+        metadata:
+          name: prometheus-data
+        spec:
+          storageClassName: gp3
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 2048Mi
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+    logLevel: info
+    logFormat: json

@@ -1,0 +1,41 @@
+version: '3'
+tasks:
+  install:prom:crds:
+    cmds:
+      - kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+      - kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+      - kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+      - kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+  bootstrap:
+    cmds:
+      - task: install:prom:crds
+      - helmfile --selector name=storage-class apply
+      - helmfile --selector name=karpenter apply
+      - helmfile --selector name=karpenter-raw apply
+  essencials:
+    cmds:
+      - helmfile --selector name=ingress-nginx apply
+      - helmfile --selector name=external-dns apply
+      - helmfile --selector name=cert-manager apply
+      - helmfile --selector name=cert-manager-issuers apply
+      - helmfile --selector name=argo-cd apply
+  gitops:
+    cmds:
+      - helmfile --selector name=external-secrets apply
+      - helmfile --selector name=external-secrets-raw apply
+      - helmfile --selector name=monitoring-raw apply
+      - helmfile --selector name=kube-prometheus-stack apply
+      - helmfile --selector name=promtail apply
+      - helmfile --selector name=loki apply
+      - helmfile --selector name=velero apply
+      - helmfile --selector name=crossplane apply
+      - helmfile --selector name=crossplane-raw apply
+  install:
+    cmds:
+      - task: bootstrap
+      - task: essencials
+  install:all:
+    cmds:
+      - task: bootstrap
+      - task: essencials
+      - task: gitops

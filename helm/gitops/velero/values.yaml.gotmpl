@@ -1,0 +1,101 @@
+revisionHistoryLimit: 1
+resources:
+  requests:
+    cpu: 150m
+    memory: 256Mi
+  limits:
+    cpu: 150m
+    memory: 256Mi
+upgradeJobResources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    cpu: 50m
+    memory: 256Mi
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.13.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+  nodeAgentPodMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+    spec:
+    # prettier-ignore
+    # {{ exec "yq" (list ".groups[0].rules" "./prometheus.rules.yaml") | nindent 6 }}
+configuration:
+  backupStorageLocation:
+    - provider: aws
+      bucket: '{{ .Values.velero_bucket }}'
+      default: true
+      accessMode: ReadWrite
+      config:
+        region: '{{ .Values.region }}'
+  volumeSnapshotLocation:
+    - provider: aws
+      config:
+        region: '{{ .Values.region }}'
+  uploaderType: kopia
+  defaultBackupTTL: 720h
+  logFormat: json
+  logLevel: info
+  defaultSnapshotMoveData: true
+  features: EnableCSI
+  defaultVolumesToFsBackup: true
+  repositoryMaintenanceJob:
+    repositoryConfigData:
+      global:
+        keepLatestMaintenanceJobs: 0
+serviceAccount:
+  server:
+    create: true
+    name: velero
+    annotations:
+      eks.amazonaws.com/role-arn: '{{ .Values.velero_role_arn }}'
+credentials:
+  useSecret: false
+backupsEnabled: true
+snapshotsEnabled: true
+deployNodeAgent: true
+nodeAgent:
+  priorityClassName: system-node-critical
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+  podSecurityContext:
+    runAsUser: 0
+    fsGroup: 0
+  containerSecurityContext:
+    # allowPrivilegeEscalation: false
+    privileged: true
+  tolerations:
+    - key: purpose
+      operator: Exists
+schedules:
+  eks-backup:
+    disabled: false
+    schedule: '0 3 * * *'
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: 720h
+      includeClusterResources: true
+      includedNamespaces:
+        - '*'
+      includedResources:
+        - '*'
+      excludedNamespaces:
+        - velero
+      snapshotVolumes: true
+cleanUpCRDs: true

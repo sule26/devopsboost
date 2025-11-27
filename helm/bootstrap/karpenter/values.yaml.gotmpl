@@ -1,14 +1,14 @@
 serviceMonitor:
-  enabled: false
+  enabled: true
 serviceAccount:
   create: true
   annotations:
-    eks.amazonaws.com/role-arn: '{{ .Values.role_arn }}'
+    eks.amazonaws.com/role-arn: '{{ .Values.karpenter_controller_role_arn }}'
 replicas: 2
-revisionHistoryLimit: 10
+revisionHistoryLimit: 3
 hostNetwork: true
-# nodeSelector:
-#   CriticalAddonsOnly: true
+nodeSelector:
+  purpose: &critical-apps critical-apps
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -19,7 +19,7 @@ affinity:
             - key: eks.amazonaws.com/nodegroup
               operator: In
               values:
-                - CriticalAddonsOnly
+                - *critical-apps
   podAntiAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       - topologyKey: kubernetes.io/hostname
@@ -30,7 +30,9 @@ topologySpreadConstraints:
 tolerations:
   - key: CriticalAddonsOnly
     operator: Exists
+  - key: purpose
+    operator: Equal
+    value: *critical-apps
 logLevel: debug
 settings:
   clusterName: '{{ .Values.cluster_name }}'
-  # interruptionQueue: '{{ .Values.cluster_name }}'

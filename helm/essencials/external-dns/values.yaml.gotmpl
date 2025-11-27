@@ -1,0 +1,21 @@
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: '{{ .Values.external_dns_role_arn }}'
+deploymentStrategy:
+  type: RollingUpdate
+serviceMonitor:
+  enabled: true
+logFormat: json
+logLevel: info
+sources:
+  - service
+  - ingress
+policy: sync
+registry: txt
+txtOwnerId: bdc-eks-prd
+txtPrefix: external-dns
+domainFilters:
+  - sule.live
+provider:
+  name: aws

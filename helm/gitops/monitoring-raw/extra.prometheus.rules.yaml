@@ -1,0 +1,13 @@
+groups:
+  - name: pods-running-too-long-qa
+    rules:
+      - alert: PodRunningTooLongInQA
+        expr: |
+          (time() - kube_pod_start_time{namespace=~".*-qa"}) > 36000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod '{{ $labels.pod }}' running too long in namespace '{{ $labels.namespace }}'"
+          description: |
+            Pod '{{ $labels.pod }}' has been running for more than 10 hours in the QA namespace '{{ $labels.namespace }}'.
