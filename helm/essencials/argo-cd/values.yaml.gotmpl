@@ -117,11 +117,11 @@ repoServer:
       command: [sh, -c]
       resources:
         requests:
-          cpu: 200m
-          memory: 256Mi
+          cpu: 300m
+          memory: 1024Mi
         limits:
-          cpu: 200m
-          memory: 256Mi
+          cpu: 300m
+          memory: 1024Mi
       args:
         - wget -qO /custom-tools/argo-cd-helmfile.sh https://raw.githubusercontent.com/travisghansen/argo-cd-helmfile/master/src/argo-cd-helmfile.sh &&
           chmod +x /custom-tools/argo-cd-helmfile.sh &&

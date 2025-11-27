@@ -1,9 +1,3 @@
-# _nodepool: &monitoring monitoring
-additionalPrometheusRulesMap:
-  cluster:
-    groups:
-      # prettier-ignore
-      # {{ exec "yq" (list ".groups[0] | [.]" "./prometheus.rules.yaml") | nindent 8 }}
 alertmanager:
   enabled: true
   ingress:

@@ -66,6 +66,10 @@ resources:
               operator: In
               values:
                 - on-demand
+            - key: karpenter.k8s.aws/instance-memory
+              operator: Gt
+              values:
+                - '7000'
           nodeClassRef:
             group: karpenter.k8s.aws
             kind: EC2NodeClass

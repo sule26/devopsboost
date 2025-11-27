@@ -28,9 +28,6 @@ metrics:
     enabled: true
   prometheusRule:
     enabled: true
-    spec:
-    # prettier-ignore
-    # {{ exec "yq" (list ".groups[0].rules" "./prometheus.rules.yaml") | nindent 6 }}
 configuration:
   backupStorageLocation:
     - provider: aws

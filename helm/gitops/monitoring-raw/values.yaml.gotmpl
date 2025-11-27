@@ -18,24 +18,3 @@ resources:
           remoteRef:
             key: rds!db-4b0d2c1f-adf2-4f11-87d9-19cd4f6c8bd0
             property: password
-  - apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: standard-cluster-monitoring-recording-rules
-    spec:
-      # prettier-ignore
-      # {{ exec "yq" (list "." "./cluster.prometheus.rules.yaml") | nindent 8 }}
-  - apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: standard-namespace-monitoring-recording-rules
-    spec:
-      # prettier-ignore
-      # {{ exec "yq" (list "." "./namespace.prometheus.rules.yaml") | nindent 8 }}
-  - apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: pods-running-too-long-qa
-    spec:
-      # prettier-ignore
-      # {{ exec "yq" (list "." "./extra.prometheus.rules.yaml") | nindent 8 }}
