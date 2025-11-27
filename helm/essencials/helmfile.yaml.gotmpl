@@ -22,6 +22,9 @@ environments:
           argo-cd:
             version: 8.6.0
             namespace: argo
+          argo-cd-raw:
+            version: ''
+            namespace: argo
           ingress-nginx:
             version: 4.14.0
             namespace: nginx
@@ -46,6 +49,9 @@ releases:
     name: argo-cd
     <<: *default
     wait: true
+  - chart: bedag/raw
+    name: argo-cd-raw
+    <<: *default
   - chart: external-dns/external-dns
     name: external-dns
     <<: *default
