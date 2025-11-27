@@ -2,7 +2,7 @@ resources:
   - apiVersion: argoproj.io/v1alpha1
     kind: ApplicationSet
     metadata:
-      name: dpm-crons
+      name: gitops-services
       # finalizers:
       #   - resources-finalizer.argocd.argoproj.io
     spec:
@@ -13,7 +13,7 @@ resources:
             repoURL: https://github.com/sule26/devopsboost.git
             revision: HEAD
             directories:
-              - path: '*'
+              - path: helm/gitops/*
       syncPolicy:
         automated:
           prune: true
@@ -33,7 +33,7 @@ resources:
           source:
             repoURL: https://github.com/sule26/devopsboost.git
             targetRevision: HEAD
-            path: ./helm/gitops
+            path: helm
             plugin:
               name: helmfile
               env:

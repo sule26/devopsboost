@@ -1,6 +1,23 @@
 resources:
-
-
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: grafana-database
+      labels:
+    spec:
+      refreshInterval: 1m
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: aws
+      target:
+        name: grafana-database
+        creationPolicy: Owner
+        deletionPolicy: Delete
+      data:
+        - secretKey: POSTGRES_GRAFANA_PASSWORD
+          remoteRef:
+            key: rds!db-4b0d2c1f-adf2-4f11-87d9-19cd4f6c8bd0
+            property: password
   - apiVersion: monitoring.coreos.com/v1
     kind: PrometheusRule
     metadata:

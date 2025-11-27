@@ -45,8 +45,6 @@ grafana:
   # adminPassword: ref+awssecrets://monitoring?region=us-east-1#/grafana-admin-password
   env:
     GF_DIAGNOSTICS_PROFILING_ENABLED: true
-  envRenderSecret:
-    POSTGRES_GRAFANA_PASSWORD: ref+awssecrets://monitoring?region=us-east-1#/eks-postgres-grafana-password
   envFromSecrets:
     - name: grafana-database
   grafana.ini:
