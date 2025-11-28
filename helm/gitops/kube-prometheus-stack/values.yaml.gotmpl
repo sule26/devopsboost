@@ -1,7 +1,7 @@
 alertmanager:
   enabled: true
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -71,7 +71,7 @@ grafana:
       cpu: 250m
       memory: 1024Mi
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -177,7 +177,7 @@ prometheusOperator:
 prometheus:
   enabled: true
   ingress:
-    enabled: true
+    enabled: false
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       external-dns.alpha.kubernetes.io/hostname: &prometheus_fqdn '{{ .Values.prometheus_host }}'
