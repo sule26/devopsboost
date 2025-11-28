@@ -51,10 +51,10 @@ grafana:
       accessControlOnCall: false
     database:
       type: postgres
-      host: eks-postgres.bdc.internal
-      name: grafana
-      user: grafana
-      database: grafana
+      host: eks-postgres.cbfidry51dim.us-east-1.rds.amazonaws.com
+      name: postgres
+      user: postgres
+      database: postgres
       password: $__env{POSTGRES_GRAFANA_PASSWORD}
       ssl_mode: require
     auth:
