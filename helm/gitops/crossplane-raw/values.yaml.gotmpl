@@ -18,8 +18,8 @@ resources:
           data:
             creds: |
               [default]
-              aws_access_key_id={{.aws_access_key_id | toString }}
-              aws_secret_access_key={{.aws_secret_access_key | toString }}
+              aws_access_key_id={{`{{.aws_access_key_id | toString }}`}}
+              aws_secret_access_key={{`{{.aws_secret_access_key | toString }}`}}
       data:
         - secretKey: aws_access_key_id
           remoteRef:
