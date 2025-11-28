@@ -4,17 +4,28 @@ repositories:
     oci: true
   - name: bedag
     url: https://bedag.github.io/helm-charts
+  - name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
+  - name: aws-ebs-csi-driver
+    url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
 environments:
   default:
     values:
       - cluster_name: uerj-devops
+        aws_ebs_csi_driver_role_arn: arn:aws:iam::154996170705:role/AWSEBSCSIDriverAccessRole
         karpenter_controller_role_arn: arn:aws:iam::154996170705:role/KarpenterControllerRole-uerj-devops
         releases:
+          aws-ebs-csi-driver:
+            version: 2.38.1
+            namespace: kube-system
           karpenter:
             version: 1.5.0
             namespace: kube-system
           karpenter-raw:
             version: ''
+            namespace: kube-system
+          metrics-server:
+            version: 3.12.2
             namespace: kube-system
           storage-class:
             version: ''
@@ -27,6 +38,9 @@ templates:
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
 releases:
+  - chart: aws-ebs-csi-driver/aws-ebs-csi-driver
+    name: aws-ebs-csi-driver
+    <<: *default
   - chart: karpenter/karpenter
     name: karpenter
     <<: *default
@@ -37,4 +51,7 @@ releases:
       - karpenter
   - chart: bedag/raw
     name: storage-class
+    <<: *default
+  - chart: metrics-server/metrics-server
+    name: metrics-server
     <<: *default

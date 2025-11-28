@@ -16,5 +16,5 @@ resources:
       data:
         - secretKey: POSTGRES_GRAFANA_PASSWORD
           remoteRef:
-            key: rds!db-4b0d2c1f-adf2-4f11-87d9-19cd4f6c8bd0
+            key: '{{ .Values.eks_postgres_secret_manager }}'
             property: password

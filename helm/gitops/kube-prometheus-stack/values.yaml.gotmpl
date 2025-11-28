@@ -51,7 +51,7 @@ grafana:
       accessControlOnCall: false
     database:
       type: postgres
-      host: eks-postgres.cbfidry51dim.us-east-1.rds.amazonaws.com
+      host: '{{ .Values.eks_postgres_host }}'
       name: postgres
       user: postgres
       database: postgres

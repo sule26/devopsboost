@@ -9,11 +9,26 @@ resources:
       goTemplate: true
       goTemplateOptions: ['missingkey=error']
       generators:
-        - git:
-            repoURL: https://github.com/sule26/devopsboost.git
-            revision: HEAD
-            directories:
-              - path: helm/gitops/*
+        - list:
+            elements:
+              - name: crossplane
+                namespace: crossplane
+              # - name: crossplane-raw
+              #   namespace: crossplane
+              - name: external-secrets
+                namespace: external-secrets
+              - name: external-secrets-raw
+                namespace: external-secrets
+              - name: promtail
+                namespace: monitoring
+              - name: loki
+                namespace: monitoring
+              # - name: kube-prometheus-stack
+              #   namespace: monitoring
+              - name: monitoring-raw
+                namespace: monitoring
+              - name: velero
+                namespace: velero
       syncPolicy:
         automated:
           prune: true
@@ -23,7 +38,7 @@ resources:
           - CreateNamespace=true
       template:
         metadata:
-          name: '{{`{{ .path.basename }}`}}'
+          name: '{{`{{.name}}`}}'
           annotations:
             argocd.argoproj.io/manifest-generate-paths: '.;..'
           # finalizers:
@@ -38,12 +53,14 @@ resources:
               name: helmfile
               env:
                 - name: HELMFILE_GLOBAL_OPTIONS
-                  value: --selector name={{`{{ .path.basename }}`}}
+                  value: --selector name={{`{{.name}}`}}
           destination:
             server: https://kubernetes.default.svc
+            namespace: '{{`{{.namespace}}`}}'
           syncPolicy:
             automated:
               prune: true
               selfHeal: true
             syncOptions:
               - CreateNamespace=true
+              - SkipDryRunOnMissingResource=true

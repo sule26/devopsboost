@@ -1,0 +1,30 @@
+serviceAccount:
+  create: true
+rbac:
+  create: true
+apiService:
+  create: true
+replicas: 1
+podDisruptionBudget:
+  enabled: false
+addonResizer:
+  enabled: false
+  resources:
+    requests:
+      cpu: 40m
+      memory: 25Mi
+    limits:
+      cpu: 40m
+      memory: 25Mi
+metrics:
+  enabled: true
+serviceMonitor:
+  enabled: true
+# See https://github.com/kubernetes-sigs/metrics-server#scaling
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi

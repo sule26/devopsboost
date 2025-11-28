@@ -1,0 +1,98 @@
+sidecars:
+  snapshotter:
+    forceEnable: true
+controller:
+  batching: true
+  volumeModificationFeature:
+    enabled: true
+  loggingFormat: json
+  nodeSelector:
+    purpose: &critical-apps critical-apps
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                  - fargate
+                  - auto
+                  - hybrid
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: purpose
+                operator: In
+                values:
+                  - *critical-apps
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - ebs-csi-controller
+            topologyKey: kubernetes.io/hostname
+          weight: 100
+  enableMetrics: true
+  serviceMonitor:
+    forceEnable: true
+  podDisruptionBudget:
+    enabled: false
+  replicaCount: 2
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: '{{ .Values.aws_ebs_csi_driver_role_arn }}'
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 10m
+      memory: 128Mi
+  tolerations:
+    - key: purpose
+      operator: Equal
+      value: *critical-apps
+node:
+  loggingFormat: json
+  logLevel: 2
+  enableMetrics: true
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                  - fargate
+                  - auto
+                  - hybrid
+              - key: node.kubernetes.io/instance-type
+                operator: NotIn
+                values:
+                  - a1.medium
+                  - a1.large
+                  - a1.xlarge
+                  - a1.2xlarge
+                  - a1.4xlarge
+  tolerateAllTaints: true
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: '{{ .Values.aws_ebs_csi_driver_role_arn }}'
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 10m
+      memory: 64Mi
+defaultStorageClass:
+  enabled: false
