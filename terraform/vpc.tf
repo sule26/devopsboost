@@ -8,7 +8,7 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "public_subnets" {
-  count  = local.len_azs
+  count                   = local.len_azs
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnets[count.index]
   availability_zone       = var.azs[count.index]
@@ -69,7 +69,7 @@ resource "aws_eip" "natgw-eip" {
 }
 
 resource "aws_nat_gateway" "nat_gateway" {
-  count  = local.len_azs
+  count         = local.len_azs
   allocation_id = aws_eip.natgw-eip[count.index].id
   subnet_id     = aws_subnet.public_subnets[count.index].id
   tags = {
@@ -93,4 +93,15 @@ resource "aws_route_table_association" "natgw_private_association" {
   count          = local.len_azs
   subnet_id      = aws_subnet.private_subnets[count.index].id
   route_table_id = aws_route_table.natgw_route_table[count.index].id
+}
+
+resource "aws_security_group" "eks_cluster" {
+  name        = "${var.cluster_name}-cluster-sg"
+  description = "EKS cluster security group"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name                     = "${var.cluster_name}-cluster-sg"
+    "karpenter.sh/discovery" = var.cluster_name
+  }
 }

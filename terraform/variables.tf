@@ -1,3 +1,9 @@
+variable "region" {
+  description = "AWS Region"
+  type        = string
+  default     = "us-east-1"
+}
+
 # VPC
 variable "vpc_name" {
   description = "Name of the VPC"
@@ -25,9 +31,9 @@ variable "public_subnets" {
 }
 
 # S3
-variable "bucket_name" {
+variable "buckets_name" {
   description = "Name of the bucket"
-  type        = string
+  type        = map(string)
 }
 
 variable "enable_force_destroy" {
@@ -36,36 +42,10 @@ variable "enable_force_destroy" {
   default     = false
 }
 
-variable "versioning" {
-  description = "Enable versioning"
-  type        = string
-  default     = "Disable"
-  validation {
-    condition     = contains(["Enabled", "Suspended", "Disabled"], var.versioning)
-    error_message = "Valid values for versioning: (Enabled, Suspended, Disabled)"
-  }
-}
-
-variable "versioning_lifecycle" {
-  description = "Enable versioning lifecycle"
-  type        = string
-  default     = "Disable"
-  validation {
-    condition     = contains(["Enabled", "Disabled"], var.versioning_lifecycle)
-    error_message = "Valid values for versioning_lifecycle: (Enabled, Disabled)"
-  }
-}
-
-variable "stored_version" {
-  description = "Number of versions to be stored"
-  type        = number
-  default     = 5
-}
-
 # EKS
 variable "cluster_version" {
   type    = string
-  default = "1.31"
+  default = "1.34"
 }
 
 variable "cluster_name" {
@@ -83,18 +63,18 @@ variable "node_policies_arn" {
 }
 
 variable "karpenter_node_policies_arn" {
-  type    = list(string)
-  default = ["arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy", "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly", "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore", "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"]
+  # type = list(string)
+  default = ["arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy", "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
 }
 
 variable "ami" {
   type    = string
-  default = "AL2_x86_64"
+  default = "BOTTLEROCKET_x86_64"
 }
 
 variable "ami_graviton" {
   type    = string
-  default = "AL2_ARM_64"
+  default = "BOTTLEROCKET_ARM_64"
 }
 
 variable "disk_size" {
@@ -110,4 +90,102 @@ variable "service_ipv4_cidr" {
 variable "karpenter_namespace" {
   type    = string
   default = "kube-system"
+}
+
+## IAM
+
+variable "aws_ebs_csi_driver_role" {
+  type    = string
+  default = "LokiAccessRole"
+}
+
+variable "loki_role" {
+  type    = string
+  default = "LokiAccessRole"
+}
+
+variable "loki_policy" {
+  type    = string
+  default = "LokiAccessPolicy"
+}
+
+variable "velero_role" {
+  type    = string
+  default = "VeleroAccessRole"
+}
+
+variable "velero_policy" {
+  type    = string
+  default = "VeleroAccessPolicy"
+}
+
+variable "cert_manager_role" {
+  type    = string
+  default = "CertManagerAccessRole"
+}
+
+variable "cert_manager_policy" {
+  type    = string
+  default = "CertManagerAccessPolicy"
+}
+
+variable "crossplane_role" {
+  type    = string
+  default = "CrossplaneAccessRole"
+}
+
+variable "crossplane_policy" {
+  type    = string
+  default = "CrossplaneAccessPolicy"
+}
+
+variable "external_secret_role" {
+  type    = string
+  default = "ExternalSecretAccessRole"
+}
+
+variable "external_secret_policy" {
+  type    = string
+  default = "ExternalSecretAccessPolicy"
+}
+
+variable "external_dns_role" {
+  type    = string
+  default = "ExternalDNSAccessRole"
+}
+
+variable "external_dns_policy" {
+  type    = string
+  default = "ExternalDNSAccessPolicy"
+}
+
+# RDS
+variable "db_allocated_storage" {
+  type    = number
+  default = 20
+}
+
+variable "db_identifier" {
+  type    = string
+  default = "eks-postgres"
+}
+
+variable "db_engine" {
+  type    = string
+  default = "postgresql"
+}
+
+variable "db_engine_version" {
+  type    = string
+  default = "16.8"
+}
+
+variable "db_instance_class" {
+  type    = string
+  default = "db.t3.micro"
+}
+
+variable "db_username" {
+  type    = string
+  default = "postgres"
 }

@@ -27,6 +27,7 @@ tasks:
       - helmfile --selector name=cert-manager apply
       - helmfile --selector name=cert-manager-issuers apply
       - helmfile --selector name=argo-cd apply
+      - helmfile --selector name=argo-cd-raw apply
   gitops:
     cmds:
       - helmfile --selector name=external-secrets apply
@@ -42,8 +43,4 @@ tasks:
     cmds:
       - task: bootstrap
       - task: essencials
-  install:all:
-    cmds:
-      - task: bootstrap
-      - task: essencials
-      - task: gitops
+
