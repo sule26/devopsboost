@@ -2,7 +2,7 @@ resources:
   - apiVersion: external-secrets.io/v1
     kind: ExternalSecret
     metadata:
-      name: grafana-database
+      name: grafana-creds
       labels:
     spec:
       refreshInterval: 1m
@@ -14,6 +14,14 @@ resources:
         creationPolicy: Owner
         deletionPolicy: Delete
       data:
+        - secretKey: admin-user
+          remoteRef:
+            key: grafana
+            property: admin-user
+        - secretKey: admin-password
+          remoteRef:
+            key: grafana
+            property: admin-password
         - secretKey: POSTGRES_GRAFANA_PASSWORD
           remoteRef:
             key: '{{ .Values.eks_postgres_secret_manager }}'
