@@ -11,8 +11,16 @@ resources:
         name: aws
       target:
         name: *aws
-        creationPolicy: Owner
         deletionPolicy: Delete
+        creationPolicy: Merge
+        template:
+          type: Opaque
+          # stringData customizado
+          stringData:
+            creds: |
+              [default]
+              aws_access_key_id=${AWS_ACCESS_KEY_ID}
+              aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
       data:
         - secretKey: aws_access_key_id
           remoteRef:
