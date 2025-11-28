@@ -12,7 +12,7 @@ resources:
       target:
         name: *aws
         deletionPolicy: Delete
-        creationPolicy: Merge
+        creationPolicy: Owner
         template:
           type: Opaque
           # stringData customizado
