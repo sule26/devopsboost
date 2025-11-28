@@ -1,0 +1,35 @@
+resources:
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: &aws-secret aws-secret
+      labels:
+    spec:
+      refreshInterval: 1m
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: aws
+      target:
+        name: *aws
+        creationPolicy: Owner
+        deletionPolicy: Delete
+      data:
+        - secretKey: aws_access_key_id
+          remoteRef:
+            key: crossplane
+            property: aws-access-key-id
+        - secretKey: aws_secret_access_key
+          remoteRef:
+            key: crossplane
+            property: aws-secret-access-key
+  - apiVersion: aws.m.upbound.io/v1beta1
+    kind: ClusterProviderConfig
+    metadata:
+      name: aws
+    spec:
+      credentials:
+        source: Secret
+        secretRef:
+          namespace: crossplane
+          name: *aws
+          key: creds
