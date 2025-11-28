@@ -68,21 +68,6 @@ ingester:
     limits:
       cpu: 400m
       memory: 2048Mi
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   persistence:
     enabled: true
     claims:
@@ -99,21 +84,6 @@ distributor:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 60
     targetMemoryUtilizationPercentage: null
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 1000m
@@ -121,26 +91,9 @@ distributor:
     limits:
       cpu: 1000m
       memory: 1024Mi
-  # maxUnavailable: 1
 indexGateway:
   replicas: 1
   resources: {}
-  # maxUnavailable: 1
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   persistence:
     enabled: true
     size: 10Gi
@@ -148,27 +101,12 @@ indexGateway:
 compactor:
   replicas: 1
   maxUnavailable: 0
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 1000m
       memory: 2048Mi
     limits:
-      # cpu: 1000m
+      cpu: 1000m
       memory: 2048Mi
   persistence:
     enabled: true
@@ -182,22 +120,6 @@ querier:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 60
     targetMemoryUtilizationPercentage: null
-  # maxUnavailable: 1
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 400m
@@ -217,22 +139,6 @@ queryFrontend:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 60
     targetMemoryUtilizationPercentage: null
-  # maxUnavailable: 1
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 200m
@@ -244,21 +150,6 @@ queryScheduler:
   enabled: true
   replicas: 1
   maxUnavailable: 0
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 200m
@@ -266,7 +157,6 @@ queryScheduler:
     limits:
       cpu: 200m
       memory: 512Mi
-  # maxUnavailable: 1
 serviceAccount:
   create: true
   annotations:
@@ -280,21 +170,6 @@ gateway:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 70
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 150m
@@ -321,21 +196,6 @@ resultsCache:
   enabled: false
   replicas: 1
   defaultValidity: 24h
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 100m
@@ -353,21 +213,6 @@ chunksCache:
   enabled: false
   podDisruptionBudget:
     maxUnavailable: 0
-  # nodeSelector:
-  #   purpose: *monitoring
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: purpose
-  #               operator: In
-  #               values:
-  #                 - *monitoring
-  # tolerations:
-  #   - key: purpose
-  #     operator: Equal
-  #     value: *monitoring
   resources:
     requests:
       cpu: 100m
