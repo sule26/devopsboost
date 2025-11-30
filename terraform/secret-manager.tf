@@ -4,7 +4,9 @@ resource "random_password" "grafana_admin_password" {
 }
 
 resource "aws_secretsmanager_secret" "grafana" {
-  name = "grafana"
+  name                    = "grafana"
+  recovery_window_in_days = 0
+
 }
 
 resource "aws_secretsmanager_secret_version" "grafana" {
@@ -17,8 +19,8 @@ resource "aws_secretsmanager_secret_version" "grafana" {
 }
 
 resource "aws_secretsmanager_secret" "crossplane" {
-  name        = "crossplane"
-  description = "Credenciais do IAM usadas pelo Crossplane para provisionar recursos na AWS"
+  name                    = "crossplane"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "crossplane_creds" {

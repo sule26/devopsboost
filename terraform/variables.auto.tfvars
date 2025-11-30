@@ -23,7 +23,7 @@ disk_size         = 100
 
 # RDS
 db_allocated_storage = 20
-db_identifier        = "eks-postgres"
+db_identifier        = "uerj-postgres"
 db_engine            = "postgres"
 db_engine_version    = "16.8"
 db_instance_class    = "db.t3.micro"
