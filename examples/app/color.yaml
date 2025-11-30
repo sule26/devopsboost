@@ -37,7 +37,7 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: web.sule.live
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
-  ingressClassName: color
+  ingressClassName: nginx
   tls:
     - hosts:
         - web.sule.live
